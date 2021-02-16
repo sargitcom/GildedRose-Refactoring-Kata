@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace GildedRose;
 
 use GildedRose\Decorator\ItemDecorator;
+use GildedRose\QualityHandler\HandleNormalItemWithNonZeroQuality;
 use GildedRose\Specification\BackstagePassesSpecification;
 use GildedRose\Specification\BrieSpecification;
 use GildedRose\Specification\IsNormalItemSpecification;
@@ -12,24 +13,18 @@ use GildedRose\Specification\QualityIsNonZero;
 use GildedRose\Specification\SellInLessThatZeroSpecification;
 use GildedRose\Specification\SulfurasSpecification;
 
-final class GildedRose
+class GuildedRoseUpdate
 {
-    /**
-     * @var Item[]
-     */
-    private $items;
-
-    public function __construct(array $items)
+    public function updateQuality(Item $item): void
     {
-        $this->items = $items;
-    }
+        $handlers = require_once(__DIR__ . '/config/handlers.php');
 
-    public function updateQuality(): void
-    {
-        $updater = new GuildedRoseUpdate();
+        $updaterHandler = new QualityUpdaterHandler();
 
-        foreach ($this->items as $item) {
-            $updater->updateQuality($item);
+        foreach ($handlers as $handle) {
+            $updaterHandler->addElement(new $handle());
         }
+
+        $updaterHandler->handle($item);
     }
 }
